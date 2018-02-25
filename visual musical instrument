@@ -1,0 +1,75 @@
+var osc;
+var playing = false;
+var earthquakes;
+var circles = [];
+
+function preload() {
+  // Get the most recent earthquake in the database
+  var url =
+   'https://earthquake.usgs.gov/earthquakes/feed/v1.0/' +
+    'summary/all_day.geojson';
+  earthquakes = loadJSON(url);
+}
+
+function setup() {
+   createCanvas(800, 1000);
+  	colorMode(HSB);
+	for (var index = 0; index < 100; index = index + 1) {
+    // new "circle" object, with x, y, xd and yd properties:
+    circles[index] = {
+		 	d: random(3,400),
+      c: color(random(360), random(360), random(255))		
+    }
+	}
+}
+
+function playMusic(earthquakes) {
+	var earthquakeMag = earthquakes.features[0].properties.mag;
+	var a = random(10,100);
+	print(earthquakeMag*100);
+	osc = new p5.Oscillator();
+  osc.setType('triangle');
+  osc.freq(earthquakeMag+a*10);
+  osc.amp(0);
+  osc.start();
+}
+
+function draw() {
+	background(0);
+	var earthquakeMag = earthquakes.features[0].properties.mag;
+	for (var index = 0; index < 100; index = index + 1) {
+    // get circle object
+    var circle = circles[index];
+		var a = random(10,100);
+		
+
+  if (earthquakeMag*100 >=100) {
+		if (mouseIsPressed) {
+
+			fill(circle.c);
+      ellipse(mouseX, mouseY,earthquakeMag+a*10,pmouseY);
+  	}
+  } else if (earthquakeMag*100 <=100) {
+	
+		fill(circle.c);
+	rect(mouseX, mouseY, earthquakeMag+a*10, pmouseY);
+		}
+	}
+}
+
+function mousePressed() {
+	var earthquakeMag = earthquakes.features[0].properties.mag;
+  playMusic(earthquakes);
+  if (osc) {
+    osc.amp(0.5, 0.1);
+    playing = true;
+  }
+	
+}
+
+function keyPressed(){
+    if (osc) {
+    osc.amp(0, 0.5);
+    playing = false;
+  }
+}
